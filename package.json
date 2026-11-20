@@ -4,6 +4,12 @@
   "description": "JS API and bundler CLI of tauri-plugin-content-update: over-the-air web content updates for Tauri 2 apps",
   "type": "module",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/shiro/tauri-content-update.git"
+  },
+  "homepage": "https://github.com/shiro/tauri-content-update#readme",
+  "bugs": "https://github.com/shiro/tauri-content-update/issues",
   "exports": {
     ".": {
       "types": "./guest-js/index.d.ts",
@@ -45,6 +51,7 @@
   "peerDependencies": {
     "@tauri-apps/api": "^2.0.0"
   },
+  "packageManager": "pnpm@12.9.0",
   "devDependencies": {
     "@tauri-apps/api": "2.12.5",
     "prettier": "3.10.1"

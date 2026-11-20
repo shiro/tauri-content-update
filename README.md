@@ -343,6 +343,12 @@ cases to `build/fixtures/<case>/src/**/*.rs` with the expected `bindings.ts` + `
 `error.txt`); `UPDATE_FIXTURES=1 cargo test -p tauri-plugin-content-update-build` rewrites them from
 the Rust output, and `pnpm test` checks the JS output against them.
 
+CI (`.github/workflows/ci.yml`) runs all of the above plus packaging dry runs on every push and pull
+request. To release, bump the version in `Cargo.toml` (`[workspace.package]`) and `package.json`, add
+a `CHANGELOG.md` section, and push a `v<version>` tag: `.github/workflows/release.yml` checks the
+versions, publishes both crates and the npm package (secrets `CARGO_REGISTRY_TOKEN` and `NPM_TOKEN`)
+and creates the GitHub release.
+
 ## License
 
 MIT
