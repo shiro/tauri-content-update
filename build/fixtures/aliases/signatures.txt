@@ -1,0 +1,8 @@
+alias_both_params()->result<number,number>
+alias_default_param()->result<number,?>
+alias_nested()->result<option<[number]>,enum{#[serde (rename_all = "camelCase")];NotFound(item_id:number)|Io(string)}>
+alias_result()->result<struct{;items:[number],next:option<#Page>},enum{#[serde (rename_all = "camelCase")];NotFound(item_id:number)|Io(string)}>
+alias_self_ref(s:[#SelfRef])->[#SelfRef]
+alias_tuple(p:(number,string))->(boolean,[number])
+alias_wrapped(w:struct{;items:[struct{;items:[number],next:option<#Page>}],next:option<#Page>})->struct{;items:[enum{;Left(number)|Right(string)}],next:option<#Page>}
+generics(w:struct{;t:number,u:option<[string]>},missing:struct{;t:number,u:option<?>},e:enum{;Left(struct{;items:[boolean],next:option<#Page>})|Right(null)})->enum{;Left(number)|Right(struct{;items:[number],next:option<#Page>})}

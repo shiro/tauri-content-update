@@ -1,0 +1,7 @@
+from_deep(item:struct{;id:number})->result<null,string>
+in_const()->number
+in_impl_body(x:struct{;a:number})->null
+in_trait_default()->[struct{;number,boolean}]
+listed(item:struct{;id:number})->option<struct{;id:number}>
+nested_in_fn()->struct{;value:number}
+raw_command(struct:number)->null

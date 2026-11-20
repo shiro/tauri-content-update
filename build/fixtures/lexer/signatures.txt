@@ -1,0 +1,2 @@
+lexer(a:struct{;a:number},b:struct{;a:number},c:struct{;café:number,#[serde (rename = "\u{e9}t\x41\n\t")]escaped:number,#[serde (rename = "line \
+        continued")]continued:number})->number

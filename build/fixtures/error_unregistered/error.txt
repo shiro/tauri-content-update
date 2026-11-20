@@ -1,0 +1,1 @@
+command `gone` is registered with generate_handler! but no #[tauri::command] fn `gone` was found in the app's sources

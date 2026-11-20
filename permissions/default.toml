@@ -1,0 +1,12 @@
+"$schema" = "schemas/schema.json"
+
+[default]
+description = "Allows all content-update commands: reading the state, confirming the running bundle, checking for, downloading, applying and resetting bundles."
+permissions = [
+  "allow-get-state",
+  "allow-notify-ready",
+  "allow-check",
+  "allow-download",
+  "allow-apply",
+  "allow-reset",
+]

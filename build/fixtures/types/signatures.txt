@@ -1,0 +1,13 @@
+channel_arg(onProgress:channel<struct{;done:number,total:option<number>}>,onRaw:channel<[number]>)->null
+everything(all_types:struct{;s:string,r:string,c:string,path:string,os:string,b:boolean,ints:(number,number,number,number,number,number),sints:(number,number,number,number,number,number),floats:(number,number),value:any,opt:option<option<number>>,opt_list:[option<number>],lists:([number],[number],[number],[number],[number],[number]),maps:({string:number},{string:[number]},{string:struct{;a:number}}),map_one_arg:?HashMap < String >,smart:(number,string,string,string,[number]),slice:[number],mut_ref:[number],array:[number],array_expr:[struct{;a:number}],tuple1:(number),unit:null,paren:number,generic:struct{;a:number},generic_list:[struct{;a:number}],crate_path:struct{;a:number},self_path:struct{;a:number},super_path:struct{;a:number},foreign_path:?other : : Local,nested_path:?nested : : Local2,nested_local:struct{;b:number},duration:?std : : time : : Duration,with_lifetime:?Foo < ' a , T >,turbofish:[number],leading:string,dyn_box:?dyn std : : error : : Error + Send + Sync + ' static,bare_trait:?Error + Send,impl_trait:?impl Iterator < Item = u8 >,fn_ptr:?fn (u8) - > u8,unsafe_fn:?unsafe extern "C" fn (* const u8),hr_fn:?for < ' b > fn (& ' b u8) - > & ' b u8,hr_trait:?dyn for < ' b > Fn (& ' b u8) - > u8,ptr:?* mut u8,never:?!,infer:[?_],qself:?< T as Iterator > : : Item,assoc:?T : : Output,macro_type:?my_macro ! (u8),option_bare:?Option,result:result<number,string>,io_result:result<number,?>,const_arg:?Array < u8 , 3 >,bool_arg:?Flag < true >,block_arg:?Array < u8 , {1 + 2} >,channel_field:channel<number>,raw_type:struct{;a:number},fn_trait:?dyn FnMut (u8 , String) - > Result < () , String > + Send,nested_generic:[{string:[(number,option<string>)]}]},tree:struct{;children:[#Tree],parent:option<#Tree>},a_ref:struct{;b:option<struct{;a:[#A]}>},type:string,default:number,function:boolean,plain_name:number)->result<[option<(number,string)>],?Error>
+generic_fn(value:number)->result<number,string>
+result_arg(r:result<number,string>,tupleArg:(number,string),listOfOptions:[option<string>])->null
+returns_box()->result<number,string>
+returns_impl()->?impl Serialize
+returns_io_result()->result<string,?>
+returns_list()->[string]
+returns_opaque()->?tauri : : ipc : : Response
+returns_ref(x:string)->string
+returns_result_unit()->result<null,string>
+returns_unit()->null
+returns_value()->any

@@ -1,0 +1,1 @@
+app_info()->struct{#[serde (rename_all = "camelCase")];version:string,platform:string}

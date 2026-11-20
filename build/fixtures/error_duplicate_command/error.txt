@@ -1,0 +1,1 @@
+command `a` is defined more than once

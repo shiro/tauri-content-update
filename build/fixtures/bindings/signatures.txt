@@ -1,0 +1,3 @@
+events(onEvent:channel<enum{#[serde (tag = "type")];Started(at:number)|Stopped()}>)->null
+greet(type:string,userName:option<string>)->string
+info()->result<struct{#[serde (rename_all = "camelCase")];app_version:string,#[serde (skip_serializing_if = "Option::is_none")]size:option<number>,#[serde (skip)]secret:string,kind:enum{#[serde (rename_all = "kebab-case")];DesktopApp()|Mobile()},pages:struct{;items:[string]}},?Error>
