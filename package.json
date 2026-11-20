@@ -1,0 +1,52 @@
+{
+  "name": "tauri-plugin-content-update",
+  "version": "0.1.0",
+  "description": "JS API and bundler CLI of tauri-plugin-content-update: over-the-air web content updates for Tauri 2 apps",
+  "type": "module",
+  "license": "MIT",
+  "exports": {
+    ".": {
+      "types": "./guest-js/index.d.ts",
+      "default": "./guest-js/index.js"
+    },
+    "./bundle": {
+      "types": "./lib/bundle.d.mts",
+      "default": "./lib/bundle.mjs"
+    },
+    "./bindings": {
+      "types": "./lib/bindings.d.mts",
+      "default": "./lib/bindings.mjs"
+    }
+  },
+  "types": "./guest-js/index.d.ts",
+  "bin": {
+    "content-update": "./bin/content-update.mjs"
+  },
+  "scripts": {
+    "test": "node --test",
+    "format": "prettier --write ."
+  },
+  "files": [
+    "guest-js/",
+    "lib/",
+    "!lib/*.test.mjs",
+    "bin/"
+  ],
+  "keywords": [
+    "tauri",
+    "tauri-plugin",
+    "ota",
+    "live-update",
+    "content-update"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "peerDependencies": {
+    "@tauri-apps/api": "^2.0.0"
+  },
+  "devDependencies": {
+    "@tauri-apps/api": "2.12.5",
+    "prettier": "3.10.1"
+  }
+}
