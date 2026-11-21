@@ -347,7 +347,9 @@ CI (`.github/workflows/ci.yml`) runs all of the above plus packaging dry runs on
 request. To release, bump the version in `Cargo.toml` (`[workspace.package]`) and `package.json`, add
 a `CHANGELOG.md` section, and push a `v<version>` tag: `.github/workflows/release.yml` checks the
 versions, publishes both crates and the npm package (secrets `CARGO_REGISTRY_TOKEN` and `NPM_TOKEN`)
-and creates the GitHub release.
+and creates the GitHub release. The registries can't publish atomically, so both tokens and both
+packages are checked (dry runs) before anything is uploaded, and the publish steps skip versions already
+on the registry: re-running a failed release job completes a partial release.
 
 ## License
 

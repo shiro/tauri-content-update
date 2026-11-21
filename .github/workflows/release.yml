@@ -43,11 +43,23 @@ jobs:
           grep -q "^## $tag\$" CHANGELOG.md || { echo "::error::CHANGELOG.md has no '## $tag' section"; exit 1; }
           echo "version=$tag" >> "$GITHUB_OUTPUT"
 
-  crates:
-    name: Publish crates
+  # crates.io and npm cannot publish atomically together. To avoid releasing one without the other, a
+  # single job validates both tokens and both packages (dry runs) before uploading anything, then
+  # publishes crates (more failure modes: verify build, crates.io limits) before npm (a tarball upload).
+  # Every publish step skips versions already on the registry, so re-running a failed job completes a
+  # partial release.
+  publish:
+    name: Publish crates and npm package
     needs: [ci, check-version]
     runs-on: ubuntu-24.04
     environment: release
+    permissions:
+      contents: read
+      id-token: write # npm provenance
+    env:
+      VERSION: ${{ needs.check-version.outputs.version }}
+      CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
+      NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
     steps:
       - uses: actions/checkout@v5
       - name: Install system libraries
@@ -57,31 +69,58 @@ jobs:
             libwebkit2gtk-4.1-dev libgtk-3-dev libsoup-3.0-dev librsvg2-dev pkg-config
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
-      - run: cargo publish --workspace --locked
-        env:
-          CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
-
-  npm:
-    name: Publish npm package
-    needs: [ci, check-version]
-    runs-on: ubuntu-24.04
-    environment: release
-    permissions:
-      contents: read
-      id-token: write # npm provenance
-    steps:
-      - uses: actions/checkout@v5
       - uses: actions/setup-node@v5
         with:
           node-version: 24
           registry-url: https://registry.npmjs.org
-      - run: npm publish --provenance --access public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Check tokens
+        run: |
+          [ -n "$CARGO_REGISTRY_TOKEN" ] || { echo "::error::CARGO_REGISTRY_TOKEN is not set"; exit 1; }
+          [ -n "$NODE_AUTH_TOKEN" ] || { echo "::error::NPM_TOKEN is not set"; exit 1; }
+          # crates.io: an invalid token yields "authentication failed"; a valid one is accepted, or
+          # rejected only because the endpoint is website-only.
+          body=$(curl -sS -H "Authorization: $CARGO_REGISTRY_TOKEN" -H "User-Agent: ${GITHUB_REPOSITORY} release" \
+            -w '\n%{http_code}' https://crates.io/api/v1/me)
+          code=${body##*$'\n'}
+          if [ "$code" != 200 ] && ! grep -q "crates.io website" <<<"$body"; then
+            echo "::error::crates.io rejected CARGO_REGISTRY_TOKEN ($code)"; echo "$body"; exit 1
+          fi
+          echo "npm user: $(npm whoami)"
+
+      - name: Find what is not published yet
+        id: pending
+        run: |
+          crates=""
+          for c in $(cargo metadata --no-deps --format-version 1 | jq -r '.packages[].name'); do
+            code=$(curl -s -o /dev/null -w '%{http_code}' -H "User-Agent: ${GITHUB_REPOSITORY} release" \
+              "https://crates.io/api/v1/crates/$c/$VERSION")
+            if [ "$code" = 200 ]; then echo "crate $c@$VERSION already published"; else crates="$crates -p $c"; fi
+          done
+          npm_name=$(jq -r .name package.json)
+          if npm view "$npm_name@$VERSION" version >/dev/null 2>&1; then
+            echo "npm $npm_name@$VERSION already published"; npm=false
+          else npm=true; fi
+          echo "crates=$crates" >> "$GITHUB_OUTPUT"
+          echo "npm=$npm" >> "$GITHUB_OUTPUT"
+
+      - name: Dry run (crates)
+        if: steps.pending.outputs.crates != ''
+        run: cargo publish --locked --dry-run ${{ steps.pending.outputs.crates }}
+      - name: Dry run (npm)
+        if: steps.pending.outputs.npm == 'true'
+        run: npm publish --dry-run --access public
+
+      - name: Publish crates
+        if: steps.pending.outputs.crates != ''
+        run: cargo publish --locked ${{ steps.pending.outputs.crates }}
+      - name: Publish npm package
+        if: steps.pending.outputs.npm == 'true'
+        run: npm publish --provenance --access public
 
   github-release:
     name: GitHub release
-    needs: [crates, npm, check-version]
+    needs: [publish, check-version]
     runs-on: ubuntu-24.04
     permissions:
       contents: write
