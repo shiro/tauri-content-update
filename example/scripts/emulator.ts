@@ -144,8 +144,8 @@ async function waitForDeviceOverlays(
           (name): name is string =>
             !!name && name.includes(`emulation.${DEVICE}`),
         );
-      for (const name of disabled)
-        await adb(serial, [
+      for (const name of disabled) {
+        const out = await adb(serial, [
           "shell",
           "cmd",
           "overlay",
@@ -153,13 +153,17 @@ async function waitForDeviceOverlays(
           "--user",
           "0",
           name,
-        ]).catch(() => {});
+        ]).catch((e) => `failed: ${e instanceof Error ? e.message : e}`);
+        console.warn(`enabling ${name} on ${serial}: ${out.trim() || "ok"}`);
+      }
     }
     if (Date.now() > end) {
       const overlays = list
         .split("\n")
         .filter((l) => l.includes(`emulation.${DEVICE}`))
         .join("\n");
+      // (the whole list would show whether the overlay package is missing or not enabled)
+      console.warn(`overlay list of ${serial}:\n${list}`);
       throw new Error(
         `${DEVICE} overlays were not enabled on ${serial} in ${timeoutMs / 1000}s:\n${overlays || "(none listed)"}`,
       );
