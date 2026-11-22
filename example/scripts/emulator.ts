@@ -126,11 +126,35 @@ async function waitForDeviceOverlays(
     `\\[x\\] com\\.android\\.\\S*emulation\\.${DEVICE}\\r?$`,
     "gm",
   );
+  // on some runners (CI, emulator 37.3.10) the emulator never enables them itself: after a grace
+  // period, enable the disabled ones through the overlay manager
+  const forceAt = Date.now() + 60_000;
+  let forced = false;
   while (true) {
     const list = await adb(serial, ["shell", "cmd", "overlay", "list"]).catch(
       () => "",
     );
     if (list.match(enabled)?.length == 2) return;
+    if (!forced && Date.now() > forceAt) {
+      forced = true;
+      const disabled = list
+        .split("\n")
+        .map((l) => l.match(/^\[ \] (\S+)\r?$/)?.[1])
+        .filter(
+          (name): name is string =>
+            !!name && name.includes(`emulation.${DEVICE}`),
+        );
+      for (const name of disabled)
+        await adb(serial, [
+          "shell",
+          "cmd",
+          "overlay",
+          "enable",
+          "--user",
+          "0",
+          name,
+        ]).catch(() => {});
+    }
     if (Date.now() > end) {
       const overlays = list
         .split("\n")
