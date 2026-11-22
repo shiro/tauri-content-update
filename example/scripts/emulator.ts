@@ -116,7 +116,11 @@ export async function waitForBoot(serial: string, timeoutMs = 4 * 60_000) {
 
 // a few seconds after the first boot the emulator enables the device profile's resource overlays,
 // which relaunches every activity (and so destroys an app's webview); apps are launched after that
-async function waitForDeviceOverlays(serial: string, timeoutMs = 60_000) {
+// (slower on CI runners: software rendering, fewer cores)
+async function waitForDeviceOverlays(
+  serial: string,
+  timeoutMs = process.env.CI ? 3 * 60_000 : 60_000,
+) {
   const end = Date.now() + timeoutMs;
   const enabled = new RegExp(
     `\\[x\\] com\\.android\\.\\S*emulation\\.${DEVICE}\\r?$`,
@@ -127,8 +131,15 @@ async function waitForDeviceOverlays(serial: string, timeoutMs = 60_000) {
       () => "",
     );
     if (list.match(enabled)?.length == 2) return;
-    if (Date.now() > end)
-      throw new Error(`${DEVICE} overlays were not enabled on ${serial}`);
+    if (Date.now() > end) {
+      const overlays = list
+        .split("\n")
+        .filter((l) => l.includes(`emulation.${DEVICE}`))
+        .join("\n");
+      throw new Error(
+        `${DEVICE} overlays were not enabled on ${serial} in ${timeoutMs / 1000}s:\n${overlays || "(none listed)"}`,
+      );
+    }
     await sleep(500);
   }
 }
