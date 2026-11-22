@@ -170,49 +170,28 @@ jobs:
           sudo udevadm control --reload-rules
           sudo udevadm trigger --name-match=kvm
 
-      - uses: actions/setup-java@v5
-        with:
-          distribution: temurin
-          java-version: 21
+      # the runner's preinstalled Android SDK is unused (the emulator SDK comes from nix), its space
+      # is needed for the nix store
+      - name: Free disk space
+        run: sudo rm -rf /usr/local/lib/android
 
-      # same SDK packages as example/shell.nix; the emulator's API level is set in scripts/emulator.ts
-      - name: Install Android SDK packages
-        run: |
-          api=$(sed -n 's/.*ANDROID_API_LEVEL = "\([0-9.]*\)".*/\1/p' example/scripts/emulator.ts)
-          sdkmanager="$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager"
-          yes | "$sdkmanager" --licenses >/dev/null || true
-          "$sdkmanager" --install \
-            "platforms;android-36" "platforms;android-37.0" "build-tools;36.0.0" \
-            "ndk;27.2.12479018" platform-tools emulator \
-            "system-images;android-$api;google_apis;x86_64" >/dev/null
-          echo "NDK_HOME=$ANDROID_HOME/ndk/27.2.12479018" >> "$GITHUB_ENV"
-
-      # the toolchain and android targets of example/src-tauri/rust-toolchain.toml
-      - name: Install Rust
-        working-directory: example/src-tauri
-        run: rustup toolchain install
+      # example/shell.nix pins nixpkgs, so this is the same emulator, system image, avdmanager, NDK
+      # and JDK as local runs
+      - uses: cachix/install-nix-action@v31
 
       - uses: Swatinem/rust-cache@v2
         with:
           workspaces: example/src-tauri -> target
 
-      - uses: pnpm/action-setup@v6
-      - uses: actions/setup-node@v5
-        with:
-          node-version: 24
-          cache: pnpm
-          cache-dependency-path: |
-            pnpm-lock.yaml
-            example/pnpm-lock.yaml
-
-      - run: pnpm install --frozen-lockfile
-      - run: pnpm install --frozen-lockfile
+      - name: Android e2e
         working-directory: example
-
-      - run: pnpm e2e:android
-        working-directory: example
-        env:
-          GRADLE_OPTS: -Dorg.gradle.daemon=false
+        run: |
+          nix-shell --run '
+            set -e
+            (cd .. && pnpm install --frozen-lockfile)
+            pnpm install --frozen-lockfile
+            pnpm e2e:android
+          '
 
       - uses: actions/upload-artifact@v4
         if: failure()
@@ -221,5 +200,5 @@ jobs:
           path: |
             example/playwright-report/
             example/test-results/
-            /tmp/emulator-*.log
+            /tmp/**/emulator-*.log
           retention-days: 7

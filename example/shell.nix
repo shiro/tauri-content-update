@@ -6,7 +6,13 @@
 # - Linux desktop: WebKitGTK 4.1 + GTK 3 (tauri's linux webview), tauri-driver + Xvfb for the desktop e2e
 let
   rust_overlay = import (builtins.fetchTarball "https://github.com/oxalica/rust-overlay/archive/master.tar.gz");
-  pkgs = import <nixpkgs> {
+  # pinned so CI (example-android in .github/workflows/ci.yml) runs the same emulator, system image
+  # and avdmanager as local runs; update the rev and hash together (`nix-prefetch-url --unpack <url>`)
+  nixpkgs = builtins.fetchTarball {
+    url = "https://github.com/NixOS/nixpkgs/archive/04906337b6d53e8bb0eaf0470ae9f070a4d4eb55.tar.gz";
+    sha256 = "1ixmpdkxv55py03w9gj4qn4p90jn494a5zzx3j90c703gaa3dhcl";
+  };
+  pkgs = import nixpkgs {
     overlays = [ rust_overlay ];
     config = {
       allowUnfree = true;

@@ -358,7 +358,9 @@ cd example && nix-shell --run 'pnpm install && pnpm e2e'   # needs `pnpm install
 ```
 
 CI (`.github/workflows/ci.yml`) runs on every push and pull request: all of the above, packaging dry
-runs, and the example's typecheck and its chromium, desktop and Android e2e suites. To release, bump the version in `Cargo.toml` (`[workspace.package]`) and `package.json`, add
+runs, and the example's typecheck and its chromium, desktop and Android e2e suites (without retries).
+The Android suite runs inside `example/shell.nix`, which pins nixpkgs, so CI uses the same emulator,
+system image and `avdmanager` as local runs. To release, bump the version in `Cargo.toml` (`[workspace.package]`) and `package.json`, add
 a `CHANGELOG.md` section, and push a `v<version>` tag: `.github/workflows/release.yml` runs CI (incl. the
 example's e2e suites), checks the versions, publishes both crates and the npm package (secrets `CARGO_REGISTRY_TOKEN` and `NPM_TOKEN`)
 and creates the GitHub release. The registries can't publish atomically, so both tokens and both

@@ -126,44 +126,16 @@ async function waitForDeviceOverlays(
     `\\[x\\] com\\.android\\.\\S*emulation\\.${DEVICE}\\r?$`,
     "gm",
   );
-  // on some runners (CI, emulator 37.3.10) the emulator never enables them itself: after a grace
-  // period, enable the disabled ones through the overlay manager
-  const forceAt = Date.now() + 60_000;
-  let forced = false;
   while (true) {
     const list = await adb(serial, ["shell", "cmd", "overlay", "list"]).catch(
       () => "",
     );
     if (list.match(enabled)?.length == 2) return;
-    if (!forced && Date.now() > forceAt) {
-      forced = true;
-      const disabled = list
-        .split("\n")
-        .map((l) => l.match(/^\[ \] (\S+)\r?$/)?.[1])
-        .filter(
-          (name): name is string =>
-            !!name && name.includes(`emulation.${DEVICE}`),
-        );
-      for (const name of disabled) {
-        const out = await adb(serial, [
-          "shell",
-          "cmd",
-          "overlay",
-          "enable",
-          "--user",
-          "0",
-          name,
-        ]).catch((e) => `failed: ${e instanceof Error ? e.message : e}`);
-        console.warn(`enabling ${name} on ${serial}: ${out.trim() || "ok"}`);
-      }
-    }
     if (Date.now() > end) {
       const overlays = list
         .split("\n")
         .filter((l) => l.includes(`emulation.${DEVICE}`))
         .join("\n");
-      // (the whole list would show whether the overlay package is missing or not enabled)
-      console.warn(`overlay list of ${serial}:\n${list}`);
       throw new Error(
         `${DEVICE} overlays were not enabled on ${serial} in ${timeoutMs / 1000}s:\n${overlays || "(none listed)"}`,
       );

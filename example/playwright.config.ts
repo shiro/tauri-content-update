@@ -70,7 +70,8 @@ const videoEnabled = process.env.PW_VIDEO !== "0" && setupFfmpeg();
 export default defineConfig({
   testDir: "./tests",
   forbidOnly: !!process.env.CI,
-  retries: process.env.CI ? 2 : 0,
+  // no retries: a failure on CI should be reproducible locally, not retried away
+  retries: 0,
   workers: process.env.CI ? 1 : undefined,
   reporter: [["list"], ["html", { open: "never" }]],
   use: {
