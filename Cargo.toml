@@ -25,8 +25,8 @@ categories.workspace = true
 readme = "README.md"
 # required by tauri-plugin's build script (permissions)
 links = "tauri-plugin-content-update"
-# the npm package and the build helper crate
-exclude = ["/node_modules", "/guest-js", "/lib", "/bin", "/build", "/package.json", "/pnpm-lock.yaml", "/.prettierignore", "/shell.nix", "/.github"]
+# the npm package, the build helper crate and the example app
+exclude = ["/node_modules", "/guest-js", "/lib", "/bin", "/build", "/example", "/package.json", "/pnpm-lock.yaml", "/.prettierignore", "/shell.nix", "/.github"]
 
 [dependencies]
 tauri = "2.12.7"

@@ -1,0 +1,29 @@
+[package]
+name = "app"
+version = "0.1.0"
+edition = "2021"
+publish = false
+
+# standalone, like a real consumer of the plugin: not a member of the repository's workspace (own
+# Cargo.lock, target/ and toolchain)
+[workspace]
+
+[lib]
+# the `_lib` suffix avoids a name clash with the bin target on windows
+name = "app_lib"
+# staticlib: iOS, cdylib: android, rlib: the desktop bin (main.rs)
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2.7.6", features = [] }
+# the native API hashes for the content-update plugin + the typed command bindings (build.rs)
+tauri-plugin-content-update-build = { path = "../../build" }
+
+[dependencies]
+tauri = { version = "2.12.7", features = [] }
+tauri-plugin-log = "2.10.2"
+log = "0.4"
+serde = { version = "1", features = ["derive"] }
+# generate_context!() emits the plugin config (`plugins` in tauri.conf.json) as serde_json values
+serde_json = "1"
+tauri-plugin-content-update = { path = "../.." }

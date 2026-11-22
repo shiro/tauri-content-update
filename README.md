@@ -325,6 +325,7 @@ src/, build.rs, permissions/   the plugin crate
 build/                         the build helper crate (fixtures/: shared generator test cases)
 guest-js/                      the JS API
 lib/, bin/                     the bundler and the bindings generator (JS), the CLI
+example/                       an example app using this repository's code, with the e2e tests
 ```
 
 `shell.nix` provides the toolchain on NixOS (`nix-shell --run '…'`); elsewhere you need Rust, Node
@@ -343,10 +344,23 @@ cases to `build/fixtures/<case>/src/**/*.rs` with the expected `bindings.ts` + `
 `error.txt`); `UPDATE_FIXTURES=1 cargo test -p tauri-plugin-content-update-build` rewrites them from
 the Rust output, and `pnpm test` checks the JS output against them.
 
-CI (`.github/workflows/ci.yml`) runs all of the above plus packaging dry runs on every push and pull
-request. To release, bump the version in `Cargo.toml` (`[workspace.package]`) and `package.json`, add
-a `CHANGELOG.md` section, and push a `v<version>` tag: `.github/workflows/release.yml` checks the
-versions, publishes both crates and the npm package (secrets `CARGO_REGISTRY_TOKEN` and `NPM_TOKEN`)
+`example/` is a SolidStart app shipped as a Tauri app for Android and Linux desktop. It uses the
+plugin the way an app would, but builds against this checkout: path dependencies on both crates,
+`link:..` for the npm package. Its own Cargo workspace, lockfiles and `shell.nix` (Android SDK,
+emulator, tauri-driver) keep it separate from the root. Its Playwright suites are the plugin's
+integration tests. They test, on a fresh headless emulator and on the desktop binary through
+tauri-driver on Xvfb: staging, delta reuse, apply, rollback, resumable downloads, validation, native
+compatibility and reset.
+
+```sh
+cd example && nix-shell --run 'pnpm install && pnpm e2e'   # needs `pnpm install` in the root too
+# or one suite: pnpm e2e:chrome | pnpm e2e:desktop | pnpm e2e:android
+```
+
+CI (`.github/workflows/ci.yml`) runs on every push and pull request: all of the above, packaging dry
+runs, and the example's typecheck and its chromium, desktop and Android e2e suites. To release, bump the version in `Cargo.toml` (`[workspace.package]`) and `package.json`, add
+a `CHANGELOG.md` section, and push a `v<version>` tag: `.github/workflows/release.yml` runs CI (incl. the
+example's e2e suites), checks the versions, publishes both crates and the npm package (secrets `CARGO_REGISTRY_TOKEN` and `NPM_TOKEN`)
 and creates the GitHub release. The registries can't publish atomically, so both tokens and both
 packages are checked (dry runs) before anything is uploaded, and the publish steps skip versions already
 on the registry: re-running a failed release job completes a partial release.

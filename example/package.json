@@ -1,0 +1,54 @@
+{
+  "name": "web",
+  "license": "MIT",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite dev",
+    "build": "vite build",
+    "build:app": "content-update bindings src-tauri src/native.gen.ts && pnpm build && content-update bundle .output/public --out .output/content-update",
+    "start": "node .output/server/index.mjs",
+    "tauri": "node scripts/tauri.ts",
+    "android:dev": "node scripts/android-dev.ts",
+    "android:prod": "node scripts/android-prod.ts",
+    "android:apk": "pnpm tauri android build --debug --apk --target x86_64",
+    "desktop:dev": "pnpm tauri dev",
+    "desktop:build": "pnpm tauri build --debug --no-bundle",
+    "e2e:chrome": "playwright test --project=chromium",
+    "e2e:android": "pnpm android:apk && pnpm e2e:android:run",
+    "e2e:android:run": "PW_NO_WEBSERVER=1 playwright test --project=webview --project=content-update",
+    "e2e:desktop": "pnpm desktop:build && pnpm e2e:desktop:run",
+    "e2e:desktop:run": "PW_NO_WEBSERVER=1 playwright test --project=desktop",
+    "e2e": "pnpm e2e:chrome && pnpm e2e:android && pnpm e2e:desktop",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@solidjs/meta": "0.29.8",
+    "@solidjs/router": "1.0.3",
+    "@solidjs/start": "2.2.3",
+    "@style-this/core": "0.5.0",
+    "@style-this/solid": "0.5.0",
+    "@style-this/vite": "0.5.0",
+    "@tailwindcss/vite": "4.3.5",
+    "@tauri-apps/api": "2.12.5",
+    "nitro": "3.0.261103-rc",
+    "solid-js": "1.9.19",
+    "solid-labels": "0.17.1",
+    "tailwindcss": "4.3.5",
+    "tauri-plugin-content-update": "link:..",
+    "vite": "8.3.8"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.65.1",
+    "@styled/typescript-styled-plugin": "1.1.1",
+    "@tauri-apps/cli": "2.12.6",
+    "@types/node": "24.19.2",
+    "lightningcss": "1.33.0",
+    "playwright": "1.65.1",
+    "prettier": "3.10.1",
+    "typescript": "6.0.3"
+  },
+  "engines": {
+    "node": ">=24"
+  }
+}

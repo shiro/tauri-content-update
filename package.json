@@ -29,7 +29,7 @@
     "content-update": "./bin/content-update.mjs"
   },
   "scripts": {
-    "test": "node --test",
+    "test": "node --test \"lib/*.test.mjs\"",
     "format": "prettier --write ."
   },
   "files": [

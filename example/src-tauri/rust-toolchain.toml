@@ -1,0 +1,10 @@
+[toolchain]
+channel = "stable"
+# all android ABIs: `tauri android init/build` checks them and would call rustup (not available in the
+# nix shell) to add missing ones. The e2e emulator is x86_64, devices are mostly arm64.
+targets = [
+  "x86_64-linux-android",
+  "aarch64-linux-android",
+  "armv7-linux-androideabi",
+  "i686-linux-android",
+]
