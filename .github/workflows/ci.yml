@@ -66,6 +66,10 @@ jobs:
       - name: Pack npm package
         run: npm pack --dry-run
 
+      # the example links the repository (`link:..`), this installs and uses the packed tarball
+      - name: Smoke test the packed npm package
+        run: pnpm test:pack
+
   # The example app (example/) consumes this repository's crates (path dependencies) and npm package
   # (`link:..`) the way an app would, and its e2e suites are the plugin's integration tests. A release
   # (release.yml runs this workflow) is only published if they pass.

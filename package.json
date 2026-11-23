@@ -30,7 +30,8 @@
   },
   "scripts": {
     "test": "node --test \"lib/*.test.mjs\"",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "test:pack": "node scripts/pack-smoke.mjs"
   },
   "files": [
     "guest-js/",
@@ -54,6 +55,7 @@
   "packageManager": "pnpm@12.9.0",
   "devDependencies": {
     "@tauri-apps/api": "2.12.5",
-    "prettier": "3.10.1"
+    "prettier": "3.10.1",
+    "typescript": "6.0.3"
   }
 }
